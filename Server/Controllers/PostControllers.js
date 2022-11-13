@@ -71,3 +71,43 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// like a post
+export const likePost = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const post = await PostModel.findById(id);
+    if (!post.likes.includes(userId)) {
+      await post.updateOne({ $push: { likes: userId } });
+      return res.status(200).json({ success: true, message: "Post liked" });
+    }
+
+    return res
+      .status(403)
+      .json({ success: false, message: "Post is Already liked by you!" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// dislike a post
+export const disLikePost = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const post = await PostModel.findById(id);
+    if (post.likes.includes(userId)) {
+      await post.updateOne({ $pull: { likes: userId } });
+      return res.status(200).json({ success: true, message: "Post disliked" });
+    }
+
+    return res
+      .status(403)
+      .json({ success: false, message: "Post is not liked by you!" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
