@@ -73,3 +73,67 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// follow user
+export const followUser = async (req, res) => {
+  const { id } = req.params;
+  const { currentUserId } = req.body;
+
+  try {
+    if (id !== currentUserId) {
+      const follow = await UserModel.findById(id);
+      const following = await UserModel.findById(currentUserId);
+
+      if (!follow.followers.includes(currentUserId)) {
+        await follow.updateOne({ $push: { followers: currentUserId } });
+        await following.updateOne({ $push: { followings: id } });
+        return res
+          .status(200)
+          .json({ success: true, message: "User Followed" });
+      }
+
+      return res
+        .status(403)
+        .json({ success: false, message: "User is Already followed by you!" });
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: "Action Forbiden",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// unfollow user
+export const unFollowUser = async (req, res) => {
+  const { id } = req.params;
+  const { currentUserId } = req.body;
+
+  try {
+    if (id !== currentUserId) {
+      const follow = await UserModel.findById(id);
+      const following = await UserModel.findById(currentUserId);
+
+      if (follow.followers.includes(currentUserId)) {
+        await follow.updateOne({ $pull: { followers: currentUserId } });
+        await following.updateOne({ $pull: { followings: id } });
+        return res
+          .status(200)
+          .json({ success: true, message: "User Unfollowed" });
+      }
+
+      return res
+        .status(403)
+        .json({ success: false, message: "User is not followed by you!" });
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: "Action Forbiden",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
