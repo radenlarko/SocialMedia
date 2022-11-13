@@ -3,10 +3,10 @@ import bcrypt from "bcrypt";
 
 // Registering a new user
 export const registerUser = async (req, res) => {
-  const { username, password, firstname, lastname } = req.body;
+  const { username, password: passBody, firstname, lastname } = req.body;
 
   const salt = await bcrypt.genSalt(10);
-  const hashedPass = await bcrypt.hash(password, salt);
+  const hashedPass = await bcrypt.hash(passBody, salt);
 
   const newUser = new UserModel({
     username,
@@ -16,8 +16,16 @@ export const registerUser = async (req, res) => {
   });
 
   try {
+    const user = await UserModel.findOne({ username: username });
+    if (user) {
+      return res
+        .status(403)
+        .json({ success: false, message: "user is already registered" });
+    }
+
     await newUser.save();
-    res.status(200).json({ success: true, data: newUser });
+    const { password, ...rest } = newUser._doc;
+    return res.status(200).json({ success: true, data: rest });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -25,16 +33,17 @@ export const registerUser = async (req, res) => {
 
 // Login user
 export const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password: passBody } = req.body;
 
   try {
     const user = await UserModel.findOne({ username: username });
 
     if (user) {
-      const validity = await bcrypt.compare(password, user.password);
+      const { password, ...rest } = user._doc;
+      const validity = await bcrypt.compare(passBody, user.password);
 
       const validate = validity
-        ? res.status(200).json(user)
+        ? res.status(200).json(rest)
         : res.status(400).json({ message: "wrong password" });
       return validate;
     }

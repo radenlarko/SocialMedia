@@ -7,7 +7,8 @@ export const getUser = async (req, res) => {
     const user = await UserModel.findById(id);
 
     if (user) {
-      return res.status(200).json(user);
+      const { password, ...rest } = user._doc;
+      return res.status(200).json(rest);
     }
 
     return res.status(404).json({ message: "User does not exist!" });
