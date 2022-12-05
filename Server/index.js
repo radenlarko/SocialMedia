@@ -2,9 +2,10 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
 import AuthRoute from "./Routes/AuthRoute.js";
 import UserRoute from "./Routes/UserRoute.js";
-import PostRoute from "./Routes/PostRoute.js"
+import PostRoute from "./Routes/PostRoute.js";
 
 dotenv.config({ path: ".env.local" }); // change to dotenv.config() for production and setup .env file
 
@@ -16,6 +17,7 @@ const PORT = process.env.PORT;
 // Middleware
 app.use(bodyParser.json({ limit: "30mb", extented: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
+app.use(cors());
 
 mongoose
   .connect(process.env.MONGO_DB, {
