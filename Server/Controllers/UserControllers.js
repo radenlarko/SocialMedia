@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import UserModel from "../Models/userModel.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.local" }); // change to dotenv.config() for production and setup .env file
 
 // get all users
 export const getAllUsers = async (req, res) => {
