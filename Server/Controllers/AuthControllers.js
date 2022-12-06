@@ -1,6 +1,9 @@
 import UserModel from "../Models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.local" }); // change to dotenv.config() for production and setup .env file
 
 // Registering a new user
 export const registerUser = async (req, res) => {
