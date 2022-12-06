@@ -2,6 +2,22 @@ import bcrypt from "bcrypt";
 import UserModel from "../Models/userModel.js";
 import jwt from "jsonwebtoken";
 
+// get all users
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
+
+    const mapUser = users.map((user) => {
+      const { password, ...rest } = user._doc;
+      return rest;
+    });
+
+    return res.status(200).json({ success: true, data: mapUser });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // get a user
 export const getUser = async (req, res) => {
   const { id } = req.params;
@@ -26,7 +42,7 @@ export const updateUser = async (req, res) => {
   const { _id, currentUserAdminStatus, password: passBody } = req.body;
 
   try {
-    if (id === _id) {
+    if (id === _id || currentUserAdminStatus) {
       if (passBody) {
         const salt = await bcrypt.genSalt(10);
         const hashedPass = await bcrypt.hash(passBody, salt);
@@ -79,15 +95,15 @@ export const deleteUser = async (req, res) => {
 // follow user
 export const followUser = async (req, res) => {
   const { id } = req.params;
-  const { currentUserId } = req.body;
+  const { _id } = req.body;
 
   try {
-    if (id !== currentUserId) {
+    if (id !== _id) {
       const follow = await UserModel.findById(id);
-      const following = await UserModel.findById(currentUserId);
+      const following = await UserModel.findById(_id);
 
-      if (!follow.followers.includes(currentUserId)) {
-        await follow.updateOne({ $push: { followers: currentUserId } });
+      if (!follow.followers.includes(_id)) {
+        await follow.updateOne({ $push: { followers: _id } });
         await following.updateOne({ $push: { followings: id } });
         return res
           .status(200)
@@ -111,15 +127,15 @@ export const followUser = async (req, res) => {
 // unfollow user
 export const unFollowUser = async (req, res) => {
   const { id } = req.params;
-  const { currentUserId } = req.body;
+  const { _id } = req.body;
 
   try {
-    if (id !== currentUserId) {
+    if (id !== _id) {
       const follow = await UserModel.findById(id);
-      const following = await UserModel.findById(currentUserId);
+      const following = await UserModel.findById(_id);
 
-      if (follow.followers.includes(currentUserId)) {
-        await follow.updateOne({ $pull: { followers: currentUserId } });
+      if (follow.followers.includes(_id)) {
+        await follow.updateOne({ $pull: { followers: _id } });
         await following.updateOne({ $pull: { followings: id } });
         return res
           .status(200)
