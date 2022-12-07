@@ -30,7 +30,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
       }
     };
 
-    if (chat !== null) getUserData();
+    if (chat._id) getUserData();
   }, [chat, currentUser]);
 
   // fetch messages
@@ -44,7 +44,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
       }
     };
 
-    if (chat !== null) fetchMessages();
+    if (chat._id) fetchMessages();
   }, [chat]);
 
   // Always scroll to last Message
@@ -55,6 +55,11 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   // Send Message
   const handleSend = async (e) => {
     e.preventDefault();
+    if (!newMessage) {
+      console.log("no new message");
+      return;
+    }
+
     const message = {
       senderId: currentUser,
       text: newMessage,
@@ -66,7 +71,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
     // send message to database
     try {
       const { data } = await addMessage(message);
-      setMessages([...messages, data]);
+      setMessages([...messages, data.data]);
       setNewMessage("");
     } catch {
       console.log("error");
@@ -74,13 +79,13 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   };
 
   // Receive Message from parent component
-//   useEffect(() => {
-//     console.log("Message Arrived: ", receivedMessage);
-//     if (receivedMessage !== null && receivedMessage.chatId === chat._id) {
-//       setMessages([...messages, receivedMessage]);
-//     }
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [receivedMessage, chat._id]);
+  useEffect(() => {
+    console.log("Message Arrived: ", receivedMessage);
+    if (receivedMessage !== null && receivedMessage?.chatId === chat._id) {
+      setMessages([...messages, receivedMessage]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receivedMessage, chat._id]);
 
   return (
     <>
@@ -121,19 +126,16 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
             {/* chat-body */}
             <div className="chat-body">
               {messages.map((message) => (
-                <>
-                  <div
-                    ref={scroll}
-                    className={
-                      message.senderId === currentUser
-                        ? "message own"
-                        : "message"
-                    }
-                  >
-                    <span>{message.text}</span>{" "}
-                    <span>{format(message.createdAt)}</span>
-                  </div>
-                </>
+                <div
+                  key={message._id}
+                  ref={scroll}
+                  className={
+                    message.senderId === currentUser ? "message own" : "message"
+                  }
+                >
+                  <span>{message.text}</span>{" "}
+                  <span>{format(message.createdAt)}</span>
+                </div>
               ))}
             </div>
             {/* chat-sender */}
