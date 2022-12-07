@@ -14,6 +14,13 @@ Social Media Project sourced from ZAINKEEPSCODE
 5. npm start to start the project
 
 
+## Socket IO
+
+1. cd Socket
+2. npm install
+3. npm start to start the project
+
+
 ## Client
 
 1. cd SocialMedia-Frontend

@@ -90,7 +90,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   return (
     <>
       <div className="ChatBox-container">
-        {chat ? (
+        {chat._id ? (
           <>
             {/* chat-header */}
             <div className="chat-header">
